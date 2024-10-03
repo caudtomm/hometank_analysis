@@ -1,8 +1,13 @@
-fpath = "W:\scratch\gfriedri\caudtomm\hometank_movies\2023-06-30_06-14-34";
+fpath = "W:\scratch\gfriedri\caudtomm\hometank_movies\2024-09-25_17-22-34";
 fext = '.mkv';
 ftag = 'p';
 
 cd(fpath)
+
+%% cutting (best run on Behavior setup B main computer)
+cutMovie(pwd,'dur',600,'inForm','.mkv')
+
+%%
 files = dir(['*',ftag,'*',fext])
 
 % order files

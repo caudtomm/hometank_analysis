@@ -1,11 +1,15 @@
-fpath = "W:\scratch\gfriedri\caudtomm\hometank_movies\2024-09-25_17-22-34";
+% fpath = "\\tungsten-nas.fmi.ch\tungsten/scratch/gfriedri/caudtomm/hometank_movies/2024-10-07_13-10-55";
 fext = '.mkv';
 ftag = 'p';
 
-cd(fpath)
+if ~exist("side", "var")
+    side = 'left';
+end
+
+% cd(fullfiletol(fpath))
 
 %% cutting (best run on Behavior setup B main computer)
-cutMovie(pwd,'dur',600,'inForm','.mkv')
+% cutMovie(pwd,'dur',600,'inForm','.mkv')
 
 %%
 files = dir(['*',ftag,'*',fext])
@@ -23,12 +27,18 @@ for i_f = 1:numel(files)
 end
 files = tmp; clear tmp
 
+%% move to the output directory
+
+outfolder = fullfiletol('..',side);
+if ~exist(outfolder,"dir"); mkdir(outfolder); end
+cd(outfolder)
+
 %% crop videos
 
-boundingboxes = defineBoundingBoxes(VideoReader(files(1).name));
+boundingboxes = defineBoundingBoxes(VideoReader(fullfiletol(files(1).folder, files(1).name)));
 
 for i_f = 1:numel(files)
-    thisf = files(i_f).name;
+    thisf = fullfiletol(files(i_f).folder, files(i_f).name);
     
     tic
     outname = extractBefore(files(i_f).name,'.');
@@ -148,7 +158,7 @@ ylabel('value')
 LEDon = ysmooth>th;
 
 % extract periods
-periods = extractPeriods(LEDon);
+periods = convertPeriods(LEDon);
 nperiods = size(periods,1);
 start_fr = periods(:,1);
 stop_fr = periods(:,2);
@@ -277,18 +287,28 @@ end
 idx = trials.isrewarded;
 figure
 subplot(221)
-imagesc(mean(odorFrameAVG(:,:,idx),3))
+imagesc(mean(odorFrameAVG(:,:,idx),3,'omitmissing'))
+colormap('hot')
 title('rewarded')
 ylabel('odor')
+xticks([]); yticks([])
 caxis([-10 10])
 subplot(222)
-imagesc(mean(odorFrameAVG(:,:,~idx),3))
+imagesc(mean(odorFrameAVG(:,:,~idx),3,'omitmissing'))
+colormap('hot')
 title('not rewarded')
+xticks([]); yticks([])
 caxis([-10 10])
 subplot(223)
-imagesc(mean(foodFrameAVG(:,:,idx),3))
+imagesc(mean(foodFrameAVG(:,:,idx),3,'omitmissing'))
+colormap('hot')
 ylabel('food')
+xticks([]); yticks([])
 caxis([-10 10])
 subplot(224)
-imagesc(mean(foodFrameAVG(:,:,~idx),3))
+imagesc(mean(foodFrameAVG(:,:,~idx),3,'omitmissing'))
+colormap('hot')
+xticks([]); yticks([])
 caxis([-10 10])
+
+save('frameavgs.mat','odorFrameAVG','foodFrameAVG','-mat')
